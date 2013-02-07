@@ -12,6 +12,7 @@ import csv                              # Python csv package
 
 from . import db                        # import from local package
 
+
 def load_bottle_types(fp):
     """
     Loads in data of the form manufacturer/liquor name/type from a CSV file.
@@ -22,18 +23,32 @@ def load_bottle_types(fp):
 
     Returns number of bottle types loaded
     """
-    reader = csv.reader(fp)
+    reader = csv_reader(fp)
 
     x = []
     n = 0
-    for line in reader:
-        if line[0].startswith('#'):
-            continue
-        
-        (mfg, name, typ) = line
-        n += 1
-        db.add_bottle_type(mfg, name, typ)
 
+    try:
+	for mfg, name, typ in reader:
+	    n += 1
+	    db.add_bottle_type(mfg, name, typ)
+    except ValueError:
+	print "Incorrect line format."
+	pass
+    '''  
+    for line in reader:
+        try:
+	    (mfg, name, typ) = line;
+	except:
+	    print "Incorrect Line format"
+
+        n += 1
+
+	try:
+	    db.add_bottle_type(mfg, name, typ)
+	except:
+	    print "Failed to add bottle type"
+    '''
     return n
 
 def load_inventory(fp):
@@ -49,12 +64,50 @@ def load_inventory(fp):
     Note that a LiquorMissing exception is raised if bottle_types_db does
     not contain the manufacturer and liquor name already.
     """
-    reader = csv.reader(fp)
+    reader = csv_reader(fp)
 
     x = []
     n = 0
-    for (mfg, name, amount) in reader:
+    for line in reader:
+        try:
+	    (mfg, name, amount) = line;
+	except:
+	    print "Incorrect Line format"
+
         n += 1
-        db.add_to_inventory(mfg, name, amount)
+
+	try:
+	    db.add_to_inventory(mfg, name, amount)
+	except:
+	    print "Failed to add to the inventory"
 
     return n
+
+
+def csv_reader(fp):
+    """
+    This is a generator function that takes in a csv.
+    Ignores comments (lines that start with #) and blank lines. 
+
+    Takes a file pointer.
+
+    Yields a list from the parsed csv line. 
+    """
+
+    reader = csv.reader(fp)
+     
+    for line in reader:
+        if line[0].startswith('#') or len(line) == 0: #if not line[0].strip():
+	    continue 
+
+   	yield line
+
+
+
+
+
+
+
+
+
+
