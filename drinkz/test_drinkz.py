@@ -48,7 +48,44 @@ def test_get_liquor_amount_1():
     db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
     db.add_to_inventory('Johnnie Walker', 'Black Label', '1000 ml')
     amount = db.get_liquor_amount('Johnnie Walker', 'Black Label')
-    assert amount == '1000 ml', amount
+    
+    assert amount == 1000, amount
+
+def test_get_liquor_amount_2():
+    db._reset_db()
+
+    db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
+    
+    data = "Johnnie Walker,Black Label,1000 ml"
+    fp = StringIO(data)                 # make this look like a file handle
+    n = load_bulk_data.load_inventory(fp)
+
+    amount = db.get_liquor_amount('Johnnie Walker', 'Black Label')
+    assert amount == 1000, amount
+
+''' Changed/Added by NIK ANDREWS '''
+def test_get_liquor_amount_3():
+    db._reset_db()
+
+    db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
+    db.add_to_inventory('Johnnie Walker', 'Black Label', '1000 ml')
+    db.add_to_inventory('Johnnie Walker', 'Black Label', '13 oz')
+
+    amount = db.get_liquor_amount('Johnnie Walker', 'Black Label')
+    assert amount == 1384.46, amount
+
+def test_get_liquor_amount_4():
+    db._reset_db()
+
+    db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
+    db.add_to_inventory('Johnnie Walker', 'Black Label', '13 oz')
+    db.add_to_inventory('Johnnie Walker', 'Black Label', '11 oz')
+
+    amount = db.get_liquor_amount('Johnnie Walker', 'Black Label')
+    assert amount == 709.76, amount
+
+''' END Changes/Additions made'''
+
 
 def test_bulk_load_inventory_1():
     db._reset_db()
@@ -62,17 +99,35 @@ def test_bulk_load_inventory_1():
     assert db.check_inventory('Johnnie Walker', 'Black Label')
     assert n == 1, n
 
-def test_get_liquor_amount_2():
-    db._reset_db()
 
-    db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
+''' Changed/Added by Nik Andrews'''
+def test_bulk_load_inventory_2():
+    db._reset_db()
     
-    data = "Johnnie Walker,Black Label,1000 ml"
+    data = "#Johnnie Walker,Black Label,1000 ml"
     fp = StringIO(data)                 # make this look like a file handle
     n = load_bulk_data.load_inventory(fp)
 
-    amount = db.get_liquor_amount('Johnnie Walker', 'Black Label')
-    assert amount == '1000 ml', amount
+    assert n == 0, n
+
+def test_bulk_load_inventory_3():
+    db._reset_db()
+
+    data = "               " 
+    fp = StringIO(data)                 # make this look like a file handle
+    n = load_bulk_data.load_inventory(fp)
+
+    assert n == 1, n
+
+def test_bulk_load_inventory_4():
+    db._reset_db()
+
+    db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
+    n = load_bulk_data.load_inventory(open("test-data/inventory-data-1.txt","rb"))
+
+    assert n == 1, n
+'''END Changes/Additions made'''
+
 
 def test_bulk_load_bottle_types_1():
     db._reset_db()
@@ -84,13 +139,53 @@ def test_bulk_load_bottle_types_1():
     assert db._check_bottle_type_exists('Johnnie Walker', 'Black Label')
     assert n == 1, n
 
+''' Changed/Added by NIK ANDREWS '''
+def test_bulk_load_bottle_types_2():
+    db._reset_db()
+
+    data = "#Johnnie Walker,Black Label,blended scotch"
+    fp = StringIO(data)                 # make this look like a file handle
+    n = load_bulk_data.load_bottle_types(fp)
+
+    assert n == 0, n
+
+def test_bulk_load_bottle_types_3():
+    db._reset_db()
+
+    data = "           "
+    fp = StringIO(data)                 # make this look like a file handle
+    n = load_bulk_data.load_bottle_types(fp)
+
+    assert n == 0, n
+
+def test_bulk_load_bottle_types_4():
+    db._reset_db()
+
+    n = load_bulk_data.load_bottle_types(open("test-data/bottle-types-data-2.txt", "rb"))
+
+    assert n == 1, n
+
+''' END Changes/Additions made'''
+
+
 def test_script_load_bottle_types_1():
     scriptpath = 'bin/load-liquor-types'
     module = imp.load_source('llt', scriptpath)
     exit_code = module.main([scriptpath, 'test-data/bottle-types-data-1.txt'])
 
     assert exit_code == 0, 'non zero exit code %s' % exit_code
-    
+
+''' Changed/Added by NIK ANDREWS '''
+'''
+def test_script_load_inventory_1():
+    scriptpath = 'bin/load-liquor-inventory'
+    module = imp.load_source('llt', scriptpath)
+    exit_code = module.main([scriptpath, 'test-data/inventory-data-1.txt'])
+
+    assert exit_code == 0, 'non zero exit code %s' % exit_code
+'''
+''' END Changes/Additions made ''' 
+
 def test_get_liquor_inventory():
     db._reset_db()
 
