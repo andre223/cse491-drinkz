@@ -3,8 +3,6 @@ Database functionality for drinkz information.
 """
 
 # private singleton variables at module level
-#_bottle_types_db = []
-#_inventory_db = []
 _bottle_types_db = set()
 _inventory_db = {}
 
@@ -21,7 +19,6 @@ class LiquorMissing(Exception):
 
 def add_bottle_type(mfg, liquor, typ):
     "Add the given bottle type into the drinkz database."
-    #_bottle_types_db.append((mfg, liquor, typ))
     _bottle_types_db.add((mfg, liquor, typ)) 	#HW3 1
 
 def _check_bottle_type_exists(mfg, liquor):
@@ -46,17 +43,13 @@ def add_to_inventory(mfg, liquor, amount):
     elif amounts[1] == "oz":        
 	amountTotal += float(amounts[0]) * 29.5735
     elif amounts[1] == "gallon":        
-	amountTotal += float(amounts[0]) * 3785.41178    
+	amountTotal += float(amounts[0]) * 3785.4118    
 
     if (mfg, liquor) in _inventory_db:        
 	_inventory_db[(mfg, liquor)] += amountTotal    
     else:        
 	_inventory_db[(mfg, liquor)] = amountTotal
 
-    # just add it to the inventory database as a tuple, for now.
-    #_inventory_db.append((mfg, liquor, amount))
-    #_inventory_db[(mfg, liquor)] = amount	#HW3 1
-    
 
 def check_inventory(mfg, liquor):
     for (m, l) in _inventory_db:
@@ -69,12 +62,12 @@ def check_inventory(mfg, liquor):
 def get_liquor_amount(mfg, liquor):
     "Retrieve the total amount of any given liquor currently in inventory."
     
+    amounts = [] 
     total = 0
     for (m, l) in _inventory_db:
         if mfg == m and liquor == l:
-	    total = float(str(_inventory_db[(m,l)])) #amounts[0])*29.5735
+	    total = float(str(_inventory_db[(m,l)]))
 
-    #return str(int(total))+ " ml"
     return float("%.2f" % total)
 
 ''' END Changes/Additions made '''

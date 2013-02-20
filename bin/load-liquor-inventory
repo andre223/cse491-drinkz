@@ -14,7 +14,7 @@ def main(args):
 
    fp = open(filename)
    try:
-      n = load_inventory(fp)
+      n = load_bottle_types(fp)
    finally:
       fp.close()
 
