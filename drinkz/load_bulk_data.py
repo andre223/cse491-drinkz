@@ -35,20 +35,7 @@ def load_bottle_types(fp):
     except ValueError:
 	print "Incorrect line format."
 	pass
-    '''  
-    for line in reader:
-        try:
-	    (mfg, name, typ) = line;
-	except:
-	    print "Incorrect Line format"
-
-        n += 1
-
-	try:
-	    db.add_bottle_type(mfg, name, typ)
-	except:
-	    print "Failed to add bottle type"
-    '''
+    
     return n
 
 def load_inventory(fp):
