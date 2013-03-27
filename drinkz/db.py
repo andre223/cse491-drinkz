@@ -2,7 +2,7 @@
 Database functionality for drinkz information.
 """
 
-import drinkz.recipes
+import recipes
 
 # private singleton variables at module level
 _bottle_types_db = set()
