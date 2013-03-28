@@ -18,7 +18,7 @@ def initialize_db():
     db.add_recipe(r)    
     r = recipes.Recipe('vodka martini', [('unflavored vodka', '7 oz'),('vermouth', '1.5 oz')])
     db.add_recipe(r)    
-    r = recipes.Recipe('vomit inducing martini', [('orange juice', '6 oz'),('vermouth', '1.5 oz')])    
+    r = recipes.Recipe('kunamata', [('orange juice', '6 oz'),('vermouth', '1.5 oz')])    
     db.add_recipe(r)
 
 def test_check_generated_page():

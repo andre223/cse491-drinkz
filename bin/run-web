@@ -2,16 +2,13 @@
 import sys
 import _mypath
 
-from drinkz.app import setUpWebServer
+from drinkz.app import WebServer
 
 def main(args):
-   setUpWebServer()
+   WebServer()
    return 0
 
 #run the main() function if this script is run from the command line;
-#this will not execute if the file is imported.
-#
-#pass in command line arguments verbatim, as a list.
 
 if __name__ == '__main__':
    exit_code = main(sys.argv)

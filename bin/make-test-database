@@ -10,7 +10,7 @@ def main(args):
     try:      
 	filename = args[1]
     except Exception:      
-	filename = "database"   
+	filename = "myDatabase"   
 
     drinkz.db._reset_db()
 

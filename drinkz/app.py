@@ -51,19 +51,19 @@ font-size: 20px;
 }
 </style>
 <script>
-function myFunction()
+function alertBox()
 {
-alert("ALERT BOXX!");
+alert("You have reached the ALERT BOXX!");
 }
 </script>
 </script>
 <h1>DRINKZ HOME PAGE</h1>
-<a href='recipesList'>RECIPES</a>,
-<a href='inventoryList'>INVENTORY</a>,
-<a href='liquorTypes'>LIQUOR TYPES</a>,
-<a href='convertToML'>Convert to ml</a>,
+<a href='recipesList'>RECIPES<p></a>
+<a href='inventoryList'>INVENTORY<p></a>
+<a href='liquorTypes'>LIQUOR TYPES<p></a>
+<a href='convertToML'>CONVERT TO ML<p></a>
 <p>
-<input type="button" onclick="myFunction()" value="Alert Box" />
+<input type="button" onclick="alertBox()" value="ALERT BOX" />
 </head>
 <body>
 
@@ -133,7 +133,7 @@ alert("ALERT BOXX!");
 	amount = str(db.convert_to_ml(amount))
 
         content_type = 'text/html'
-        data = "Converted Amount %s ml<p><a href='./'>return to index</a>" % (amount)
+        data = "The amount converted to ml = %s ml<p><a href='./'>GO TO HOME PAGE</a>" % (amount)
         start_response('200 OK', list(html_headers))
         return [data]
 
@@ -222,10 +222,10 @@ font-size: 20px;}
 </style>
 <h1>CONVERT TO ML</h1>
 <form action='recvAmount'>
-Enter amount(i.e. 11 gallon or 120 oz)<input type='text' name='amount' size='20'>
+ENTER AMOUNT(ex: 100 gallon or 150 oz or 25 liter)<input type='text' name='amount' size='20'>
 <input type='submit'>
 </form>
-<p><a href='/'>Home</a>
+<p><a href='/'>GO HOME</a>
 </head>
 <body>
 """
@@ -249,7 +249,7 @@ font-size: 20px;
 	else:           
 	    val = "yes"        
 	recipeStringHTML += ("<li>"+recipe._recipeName + " " + val +"<p>")   
-    recipeStringHTML += ("</ul>"+"<p><a href='/'>Home</a>"+"""</head><body>""")    
+    recipeStringHTML += ("</ul>"+"<p><a href='/'>GO HOME</a>"+"""</head><body>""")    
 
     return recipeStringHTML
    
@@ -266,10 +266,11 @@ body {font-size: 20px;}
 
     for (m,l) in db.get_liquor_inventory():        
 	inventoryStringHTML+= ("<li>" + str(m)+ " " + str(l)+ " "  + str(db.get_liquor_amount(m,l))+" ml"+ "<p>")
-    inventoryStringHTML += ("</ul>"+"<p><a href='/'>Home</a>"+"""</head><body>""")    
+    inventoryStringHTML += ("</ul>"+"<p><a href='/'>GO HOME</a>"+"""</head><body>""")    
     return inventoryStringHTML    
 
-def liqourTypesList():
+
+def liquorTypesList():
     liqourTypeStringHTML = """\
 <html>
 <head>
@@ -283,15 +284,16 @@ font-size: 20px;}
    
     for (m,l) in db.get_liquor_inventory():        
 	liqourTypeStringHTML += ("<li>" + str(m)+ " " + str(l) + "<p>")    
-    liqourTypeStringHTML += ("</ul>"+"<p><a href='/'>Home</a>"+"""</head><body>""")    
+    liqourTypeStringHTML += ("</ul>"+"<p><a href='/'>GO HOME</a>"+"""</head><body>""")    
     return liqourTypeStringHTML 
 
 
-def setUpWebServer():
+
+def WebServer():
     import random, socket
     port = random.randint(8000,9999)
 
-    filename = 'database'
+    filename = 'myDatabase'
     load_db(filename)
     app = SimpleApp()
     
@@ -300,18 +302,3 @@ def setUpWebServer():
     print "Try using a Web browser to go to http://%s:%d/" % \
           (socket.getfqdn(), port)
     httpd.serve_forever()
-'''
-if __name__ == '__main__':
-    args = sys.argv
-    try:
-	filename = args[1]
-    except:
-	filename = 'myTest'
-
-    for line in fileinput.input(['../bin/'+filename], inplace=True):        
-	line = line.replace("drinkz.", "")
-	sys.stdout.write(line)    
-
-    load_db('../bin/'+filename)    
-    setUpWebServer() 
-'''
