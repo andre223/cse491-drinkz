@@ -18,6 +18,15 @@ def _reset_db():
     _inventory_db = {}		
     _recipes_db = set()		
 
+
+# exceptions in Python inherit from Exception and generally don't need to
+# override any methods.
+class LiquorMissing(Exception):
+    pass
+class DuplicateRecipeName(Exception):
+    pass
+
+#SAVE to a file
 def save_db(filename):
     fp = open(filename, 'wb')
 
@@ -26,6 +35,7 @@ def save_db(filename):
 
     fp.close()
 
+#LOAD from a file
 def load_db(filename):
     global _bottle_types_db, _inventory_db, _recipes_db
 
@@ -37,13 +47,6 @@ def load_db(filename):
     fp.close()
 
 
-
-# exceptions in Python inherit from Exception and generally don't need to
-# override any methods.
-class LiquorMissing(Exception):
-    pass
-class DuplicateRecipeName(Exception):
-    pass
 
 def add_bottle_type(mfg, liquor, typ):
     "Add the given bottle type into the drinkz database."
