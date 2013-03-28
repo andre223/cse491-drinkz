@@ -280,7 +280,7 @@ h1 {color:green;}
 body {
 font-size: 20px;}
 </style>
-<h1>Liqour Types List</h1><ul>"""    
+<h1>LIQUOR TYPES</h1><ul>"""    
    
     for (m,l) in db.get_liquor_inventory():        
 	liqourTypeStringHTML += ("<li>" + str(m)+ " " + str(l) + "<p>")    
