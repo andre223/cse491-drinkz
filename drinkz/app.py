@@ -288,7 +288,7 @@ font-size: 20px;}
     return liqourTypeStringHTML 
 
 
-
+#Starts up the web application
 def WebServer():
     import random, socket
     port = random.randint(8000,9999)
