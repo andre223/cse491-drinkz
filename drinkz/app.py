@@ -40,13 +40,33 @@ class SimpleApp(object):
             
     def index(self, environ, start_response):
         data = """\
-Visit:
+
+<html>
+<head>
+<title>HOME</title>
+<style type='text/cc'>
+h1 {color:green;}
+body {
+font-size: 20px;
+}
+</style>
+<script>
+function myFunction()
+{
+alert("ALERT BOXX!");
+}
+</script>
+</script>
+<h1>DRINKZ HOME PAGE</h1>
 <a href='recipesList'>RECIPES</a>,
 <a href='inventoryList'>INVENTORY</a>,
 <a href='liquorTypes'>LIQUOR TYPES</a>,
-<a href='convertToML'>Convert to ml</a>, or
+<a href='convertToML'>Convert to ml</a>,
 <p>
-<img src='/helmet'>
+<input type="button" onclick="myFunction()" value="Alert Box" />
+</head>
+<body>
+
 """
         start_response('200 OK', list(html_headers))
         return [data]
@@ -173,40 +193,81 @@ Your last name? <input type='text' name='lastname' size='20'>
 <p><a href='/'>Home</a>
 """
 '''
+
 def convertToML():
     return """
+<html>
+<head>
+<title>CONVERT TO ML</title>
+<style type='text/css'>
+h1 {color:green;}
+body {
+font-size: 20px;}
+</style>
+<h1>CONVERT TO ML</h1>
 <form action='recvAmount'>
 Enter amount(i.e. 11 gallon or 120 oz)<input type='text' name='amount' size='20'>
 <input type='submit'>
 </form>
 <p><a href='/'>Home</a>
+</head>
+<body>
 """
 
 def recipesList():    
     recipeList = db.get_all_recipes()    
-    recipeStringHTML = "<ul>"
+    recipeStringHTML = """\
+<html>
+<head>
+<title>Recipe List</title>
+<style type='text/css'>
+h1 {color:green;}
+body {
+font-size: 20px;
+}
+</style>
+<h1>RECIEPE LIST</h1><ul>"""
     for recipe in recipeList:        
 	if recipe.need_ingredients():            
 	    val = "no"        
 	else:           
 	    val = "yes"        
 	recipeStringHTML += ("<li>"+recipe._recipeName + " " + val +"<p>")   
-    recipeStringHTML += ("</ul>"+"<p><a href='/'>Home</a>")    
+    recipeStringHTML += ("</ul>"+"<p><a href='/'>Home</a>"+"""</head><body>""")    
 
     return recipeStringHTML
    
-def inventoryList():    
-    inventoryStringHTML = "<ul>"    
+def inventoryList(): 
+    inventoryStringHTML = """\    
+<html>
+<head>
+<title>INVENTORY LIST</title>
+<style type='text/css'>
+h1 {color:green;}
+body {font-size: 20px;}
+</style>
+<h1>INVENTORY LIST</h1><ul>"""   
+
     for (m,l) in db.get_liquor_inventory():        
 	inventoryStringHTML+= ("<li>" + str(m)+ " " + str(l)+ " "  + str(db.get_liquor_amount(m,l))+" ml"+ "<p>")
-    inventoryStringHTML += ("</ul>"+"<p><a href='/'>Home</a>")    
+    inventoryStringHTML += ("</ul>"+"<p><a href='/'>Home</a>"+"""</head><body>""")    
     return inventoryStringHTML    
 
-def liqourTypesList():    
-    liqourTypeStringHTML = "<ul>"
+def liqourTypesList():
+    liqourTypeStringHTML = """\
+<html>
+<head>
+<title>Liqour Types List</title>
+<style type='text/css'>
+h1 {color:green;}
+body {
+font-size: 20px;}
+</style>
+<h1>Liqour Types List</h1><ul>"""    
+   
     for (m,l) in db.get_liquor_inventory():        
 	liqourTypeStringHTML += ("<li>" + str(m)+ " " + str(l) + "<p>")    
-    liqourTypeStringHTML += ("</ul>"+"<p><a href='/'>Home</a>")    
+    liqourTypeStringHTML += ("</ul>"+"<p><a href='/'>Home</a>"+"""</head><body>""")    
     return liqourTypeStringHTML 
 
 
