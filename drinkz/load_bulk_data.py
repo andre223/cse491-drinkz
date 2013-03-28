@@ -84,7 +84,11 @@ def csv_reader(fp):
     reader = csv.reader(fp)
      
     for line in reader:
-        if line[0].startswith('#') or len(line) == 0: #if not line[0].strip():
+        if not line:
+	    continue
+	if not line[0].strip():
+ 	    continue
+        if line[0].startswith('#'):
 	    continue 
 
    	yield line

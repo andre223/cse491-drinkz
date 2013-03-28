@@ -1,5 +1,7 @@
 #! /usr/bin/env python
 from wsgiref.simple_server import make_server
+from db import save_db, load_db
+import sys
 import urlparse
 import simplejson
 import db
@@ -13,7 +15,6 @@ dispatch = {
     '/inventoryList' : 'inventoryList',
     '/liquorTypes' : 'liquorTypes',
     '/convertToML' : 'formConvertToML',
-    '/recv' : 'recv',
     '/recvAmount' : 'recvAmount',
     '/rpc'  : 'dispatch_rpc'
 }
@@ -44,7 +45,6 @@ Visit:
 <a href='inventoryList'>INVENTORY</a>,
 <a href='liquorTypes'>LIQUOR TYPES</a>,
 <a href='convertToML'>Convert to ml</a>, or
-<a href='form'>a form...</a>
 <p>
 <img src='/helmet'>
 """
@@ -80,18 +80,18 @@ Visit:
 
         start_response('200 OK', [('Content-type', content_type)])
         return [data]
-
+    '''
     def form(self, environ, start_response):
         data = form()
 
         start_response('200 OK', list(html_headers))
         return [data]
-
+    '''
     def formConvertToML(self, environ, start_response):
 	data = convertToML()
         start_response('200 OK', list(html_headers))
 	return [data]
-   
+    ''' 
     def recv(self, environ, start_response):
         formdata = environ['QUERY_STRING']
         results = urlparse.parse_qs(formdata)
@@ -104,7 +104,7 @@ Visit:
 
         start_response('200 OK', list(html_headers))
         return [data]
-
+    '''
     def recvAmount(self, environ, start_response):
         formdata = environ['QUERY_STRING']
         results = urlparse.parse_qs(formdata)
@@ -162,7 +162,7 @@ Visit:
 
     def rpc_add(self, a, b):
         return int(a) + int(b)
-    
+''' 
 def form():
     return """
 <form action='recv'>
@@ -172,7 +172,7 @@ Your last name? <input type='text' name='lastname' size='20'>
 </form>
 <p><a href='/'>Home</a>
 """
-
+'''
 def convertToML():
     return """
 <form action='recvAmount'>
@@ -214,6 +214,8 @@ def setUpWebServer():
     import random, socket
     port = random.randint(8000,9999)
 
+    filename = 'database'
+    load_db(filename)
     app = SimpleApp()
     
     httpd = make_server('', port, app)

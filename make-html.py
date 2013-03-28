@@ -3,6 +3,17 @@
 import os
 import drinkz.db
 import drinkz.recipes
+import sys
+from drinkz.db import save_db, load_db
+
+if __name__ == '__main__':
+    args = sys.argv
+    try:
+	filename = args[1]
+    except:
+	filename = 'myTest'
+
+    load_db('bin/'+filename)
 
 
 try:
@@ -10,7 +21,7 @@ try:
 except OSError:
     pass
 
-
+'''
 drinkz.db._reset_db()
 
 drinkz.db.add_bottle_type('Johnnie Walker', 'black label', 'blended scotch')
@@ -33,6 +44,7 @@ drinkz.db.add_recipe(r)
 
 r = drinkz.recipes.Recipe('kunamatata', [('vodka', '1 oz'),('rasberry liqueur','1 oz'),('dark rum','1 oz'),('orange juice','2 oz'),('7-Up Soda','2 oz')])
 drinkz.db.add_recipe(r)
+'''
 
 ###
 fp = open('html/index.html', 'w')
@@ -54,7 +66,7 @@ for recipe in recipeList:
     print >> fp, "<li>" + recipe._recipeName + " " + val + "<p>"
 
 print >> fp, "</ul>"
-print >>fp, "<a href='index.html'>HOME</a><p><a href='inventory.html'>INVENTORY</a> <p><a href='liquor_types.html'>Liquor Types</a>"
+print >>fp, "<a href='index.html'>HOME</a><p><a href='inventory.html'>INVENTORY</a> <p><a href='liquor_types.html'>LIQUOR TYPES</a>"
 
 fp.close()
 
@@ -67,7 +79,7 @@ for (m,l) in drinkz.db.get_liquor_inventory():
     print >> fp, "<li>" + str(m) + " " + str(l) + " " + str(drinkz.db.get_liquor_amount(m,l)) + " ml"+ "<p>"
 print >> fp, "</ul>"
 
-print >>fp, "<a href='index.html'>HOME</a><p><a href='recipes.html'>RECIPES</a><p><a href='liquor_types.html'>Liquor Types</a>"
+print >>fp, "<a href='index.html'>HOME</a><p><a href='recipes.html'>RECIPES</a><p><a href='liquor_types.html'>LIQUOR TYPES</a>"
 
 fp.close()
 
@@ -80,7 +92,8 @@ for (m,l) in drinkz.db.get_liquor_inventory():
     print >> fp, "<li>" + str(m) + " " + str(l) +"<p>"
 print >> fp, "</ul>"
 
-print >>fp, "<a href='index.html'>HOME</a><p><a href='recipes.html'>RECIPES</a><p><a href='inventory.html'>Inventory</a>"
+print >>fp, "<a href='index.html'>HOME</a><p><a href='recipes.html'>RECIPES</a><p><a
+href='inventory.html'>INVENTORY</a>"
 
 fp.close()
 

@@ -116,7 +116,7 @@ def test_bulk_load_inventory_3():
     fp = StringIO(data)                 # make this look like a file handle
     n = load_bulk_data.load_inventory(fp)
 
-    assert n == 1, n
+    assert n == 0, n
 
 def test_bulk_load_inventory_4():
     db._reset_db()
