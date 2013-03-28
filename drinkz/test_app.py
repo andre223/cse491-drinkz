@@ -18,7 +18,7 @@ def initialize_db():
     db.add_recipe(r)    
     r = recipes.Recipe('vodka martini', [('unflavored vodka', '7 oz'),('vermouth', '1.5 oz')])
     db.add_recipe(r)    
-    r = recipes.Recipe('kunamata', [('orange juice', '6 oz'),('vermouth', '1.5 oz')])    
+    r = recipes.Recipe('kunamatata', [('orange juice', '6 oz'),('vermouth', '1.5 oz')])    
     db.add_recipe(r)
 
 def test_check_generated_page():
@@ -39,4 +39,4 @@ def test_check_generated_page():
 
     assert text.find("vodka martini") != -1, text    
     assert text.find("scotch on the rocks") != -1, text    
-    assert text.find("vomit inducing martini") != -1, text
+    assert text.find("kunamatata") != -1, text
