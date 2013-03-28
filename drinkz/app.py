@@ -177,6 +177,22 @@ alert("ALERT BOXX!");
         response = simplejson.dumps(response)
         return str(response)
 
+    def rpc_convert_units_to_ml(self,amount):        
+	return str(db.convert_to_ml(amount))    
+
+    def rpc_get_recipe_names(self):        
+	recipeList = db.get_all_recipes()        
+	nameList = list()        
+	for recipe in recipeList:            
+	    nameList.append(recipe._recipeName)        
+	return nameList    
+
+    def rpc_get_liqour_inventory(self):        
+	liqourInvList = list()        
+	for (m,l) in db.get_liquor_inventory():
+            liqourInvList.append((m,l))
+        return liqourInvList
+
     def rpc_hello(self):
         return 'world!'
 
