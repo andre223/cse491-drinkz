@@ -330,7 +330,7 @@ def convertToML():
 
     env = jinja2.Environment(loader=loader)
     # pick up a filename to render
-    filename = "listPages.html"
+    filename = "pages.html"
     
     # variables for the template rendering engine
     vars = dict(title = 'Convert to ML', addtitle = "",
@@ -341,13 +341,14 @@ Enter amount(eg. 11 gallon or 120 oz or 15 liter)<input type='text' name='amount
     x = env.get_template(filename).render(vars).encode('ascii','ignore')
     return x
 
+
 def recipesList():
     # this sets up jinja2 to load templates from the 'templates' directory
     loader = jinja2.FileSystemLoader('../drinkz/templates')
     env = jinja2.Environment(loader=loader)
 
     # pick up a filename to render
-    filename = "listPages.html" #recipe nonsense
+    filename = "pages.html" #recipe nonsense
     recipeList = db.get_all_recipes()
     recipeNameList = list()
     for recipe in recipeList:
@@ -378,13 +379,14 @@ Ingredients (eg.'vodka,5 oz,grape juice,10 oz')<input type='text' name='ing' siz
     x = template.render(vars).encode('ascii','ignore')
     return x
 
+
 def inventoryList():
     # this sets up jinja2 to load templates from the 'templates' directory
     loader = jinja2.FileSystemLoader('../drinkz/templates')
     env = jinja2.Environment(loader=loader)
 
     # pick up a filename to render
-    filename = "listPages.html"
+    filename = "pages.html"
 
     inventoryList = list()
     for (m,l) in db.get_liquor_inventory():
@@ -413,7 +415,7 @@ def liquorTypesList():
     env = jinja2.Environment(loader=loader)
 
     # pick up a filename to render
-    filename = "listPages.html"
+    filename = "pages.html"
 
     #recipe nonsense
     liqourTypesList = list()
