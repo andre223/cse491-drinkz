@@ -190,3 +190,12 @@ def test_get_liquor_inventory():
         x.append((mfg, liquor))
 
     assert x == [('Johnnie Walker', 'Black Label')], x
+
+
+#HW 5 - Test Cases
+def test_bulk_load_recipe_1():
+    db._reset_db()
+
+    n = load_bulk_data.load_recipes(open("test-data/recipe-data.txt", "rb"))
+
+    assert n==3, n

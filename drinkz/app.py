@@ -7,7 +7,10 @@ import simplejson
 import db
 import recipes
 import os.path
-import fileinput,sys
+import fileinput
+import jinja2
+import unicodedata
+import sys
 
 dispatch = {
     '/' : 'index',
@@ -16,7 +19,11 @@ dispatch = {
     '/liquorTypes' : 'liquorTypes',
     '/convertToML' : 'formConvertToML',
     '/recvAmount' : 'recvAmount',
-    '/rpc'  : 'dispatch_rpc'
+    '/addType' : 'addType',
+    '/addInventory' : 'addInventory',
+    '/addRecipe' : 'addRecipe',
+    '/rpc'  : 'dispatch_rpc',
+    '/error' : 'error'
 }
 
 html_headers = [('Content-type', 'text/html')]
@@ -46,9 +53,7 @@ class SimpleApp(object):
 <title>HOME</title>
 <style type='text/cc'>
 h1 {color:green;}
-body {
-font-size: 20px;
-}
+body {font-size: 20px;}
 </style>
 <script>
 function alertBox()
@@ -57,14 +62,14 @@ alert("You have reached the ALERT BOXX!");
 }
 </script>
 </script>
-<h1>DRINKZ HOME PAGE</h1>
-<a href='recipesList'>RECIPES<p></a>
-<a href='inventoryList'>INVENTORY<p></a>
-<a href='liquorTypes'>LIQUOR TYPES<p></a>
-<a href='convertToML'>CONVERT TO ML<p></a>
-<p>
+<h1><center><font color="green">DRINKZ HOME PAGE</font></center></h1>
+<a href='recipesList'><center>RECIPES</center><p></a>
+<a href='inventoryList'><center>INVENTORY</center><p></a>
+<a href='liquorTypes'><center>LIQUOR TYPES</center><p></a>
+<a href='convertToML'><center>CONVERT TO ML</center><p></a>
+<p><center>
 <input type="button" onclick="alertBox()" value="ALERT BOX" />
-</head>
+</center></head>
 <body>
 
 """
@@ -93,14 +98,14 @@ alert("You have reached the ALERT BOXX!");
        
         start_response('200 OK', list(html_headers))
         return [data]
-
+    '''
     def helmet(self, environ, start_response):
         content_type = 'image/gif'
         data = open('Spartan-helmet-Black-150-pxls.gif', 'rb').read()
 
         start_response('200 OK', [('Content-type', content_type)])
         return [data]
-    '''
+    
     def form(self, environ, start_response):
         data = form()
 
@@ -133,9 +138,70 @@ alert("You have reached the ALERT BOXX!");
 	amount = str(db.convert_to_ml(amount))
 
         content_type = 'text/html'
-        data = "The amount converted to ml = %s ml<p><a href='./'>GO TO HOME PAGE</a>" % (amount)
+        data = "<font size = +4>The amount converted to ml = %s ml</font><p><a href='./'>GO TO HOME PAGE</a>" % (amount)
         start_response('200 OK', list(html_headers))
         return [data]
+    
+    #HW5
+    def addType(self, environ, start_response):
+	formdata = environ['QUERY_STRING']
+	results = urlparse.parse_qs(formdata)
+	mfg = results['mfg'][0]
+	liquor = results['liquor'][0]
+	typ = results['typ'][0]
+	db.add_bottle_type(mfg, liquor, typ)
+
+	content_type = 'text/html'
+	data = liquorTypesList()
+	start_response('200 OK', list(html_headers))
+	return [data]
+    #HW5
+    def addInventory(self, environ, start_response):
+	formdata = environ['QUERY_STRING']
+	results = urlparse.parse_qs(formdata)
+	mfg = results['mfg'][0]
+	liquor = results['liquor'][0]
+	amt = results['amt'][0]
+	
+	try:
+	    db.add_to_inventory(mfg, liquor, amt)
+	    data = inventoryList()
+	except Exception:
+	    data = inventoryList() +"""<script> alert("That liquor is not an added type.");
+</script>"""
+
+	content_type = 'text/html'
+	start_response('200 OK', list(html_headers))
+	return [data]
+
+    #HW5
+    def addRecipe(self, environ, start_response):
+	formdata = environ['QUERY_STRING']
+	results = urlparse.parse_qs(formdata)
+	name = results['name'][0]
+	ings = results['ing'][0]
+	myList = ings.split(',')
+	myIngSet = set()
+	
+	i = 0
+	while i < len(myList):
+	   val = (ingred, amount) = (myList[i],myList[i+1])
+	   myIngSet.add(val)
+	   i+=2
+
+	r = recipes.Recipe(name,myIngSet)
+
+	try:
+	    db.add_recipe(r)
+	    data = recipesList()
+	except Exception:
+	    data = recipesList()
+
+	content_type = 'text/html'
+	start_response('200 OK', list(html_headers))
+	return [data]
+
+
 
     def dispatch_rpc(self, environ, start_response):
         # POST requests deliver input data via a file-like handle,
@@ -177,6 +243,8 @@ alert("You have reached the ALERT BOXX!");
         response = simplejson.dumps(response)
         return str(response)
 
+    # HW 5 Starts here
+
     def rpc_convert_units_to_ml(self,amount):        
 	return str(db.convert_to_ml(amount))    
 
@@ -192,6 +260,49 @@ alert("You have reached the ALERT BOXX!");
 	for (m,l) in db.get_liquor_inventory():
             liqourInvList.append((m,l))
         return liqourInvList
+
+    def rpc_get_liqour_types(self):
+        liqourTypeList = list()
+        for (m,l) in db.get_liquor_types():
+            liqourTypeList.append((m,l))
+        return liqourTypeList
+                       
+    def rpc_add_bottle_type(self,mfg,liquor,typ):
+        returnVal = False
+        try:
+            db.add_bottle_type(mfg, liquor, typ)
+            returnVal = True;
+        except Exception:
+            returnVal = False
+        return returnVal
+
+    def rpc_add_to_inventory(self,mfg,liquor,amount):
+        returnVal = False
+        try:
+            db.add_to_inventory(mfg, liquor, amount)
+            returnVal = True;
+        except Exception:
+            returnVal = False
+        return returnVal
+
+    def rpc_add_recipe(self,name,ings):
+        myList = ings.split(',')
+        myIngSet = set()
+        i = 0
+        while i < len(myList):
+            
+            val = (ingred,amount) = (myList[i],myList[i+1])
+            myIngSet.add(val)
+            i+=2
+            
+        r = recipes.Recipe(name,myIngSet)
+        try:
+            db.add_recipe(r)
+            returnVal = True
+        except Exception:
+            returnVal = False
+        return returnVal
+    # HW 5 Ends here
 
     def rpc_hello(self):
         return 'world!'
@@ -210,82 +321,119 @@ Your last name? <input type='text' name='lastname' size='20'>
 """
 '''
 
+# HW5 Changes Start Here
+
+
 def convertToML():
-    return """
-<html>
-<head>
-<title>CONVERT TO ML</title>
-<style type='text/css'>
-h1 {color:green;}
-body {
-font-size: 20px;}
-</style>
-<h1>CONVERT TO ML</h1>
-<form action='recvAmount'>
-ENTER AMOUNT(ex: 100 gallon or 150 oz or 25 liter)<input type='text' name='amount' size='20'>
+    # this sets up jinja2 to load templates from the 'templates' directory
+    loader = jinja2.FileSystemLoader('../drinkz/templates')
+
+    env = jinja2.Environment(loader=loader)
+    # pick up a filename to render
+    filename = "listPages.html"
+    
+    # variables for the template rendering engine
+    vars = dict(title = 'Convert to ML', addtitle = "",
+                form = """<form action='recvAmount'><center>
+Enter amount(eg. 11 gallon or 120 oz or 15 liter)<input type='text' name='amount' size'20'>
+<input type='submit'></center></form>""", names="")
+
+    x = env.get_template(filename).render(vars).encode('ascii','ignore')
+    return x
+
+def recipesList():
+    # this sets up jinja2 to load templates from the 'templates' directory
+    loader = jinja2.FileSystemLoader('../drinkz/templates')
+    env = jinja2.Environment(loader=loader)
+
+    # pick up a filename to render
+    filename = "listPages.html" #recipe nonsense
+    recipeList = db.get_all_recipes()
+    recipeNameList = list()
+    for recipe in recipeList:
+        if recipe.need_ingredients():
+            val = "no"
+        else:
+            val = "yes"
+        recipeNameList.append(recipe._recipeName + " " + val)
+    
+    
+    # variables for the template rendering engine
+
+    vars = dict(title = 'Recipe List', addtitle = "Add Recipe",
+                form = """<form action='addRecipe'>
+Name<input type='text' name='name' size'20'><p>
+Ingredients (eg.'vodka,5 oz,grape juice,10 oz')<input type='text' name='ing' size'20'><p>
 <input type='submit'>
-</form>
-<p><a href='/'>GO HOME</a>
-</head>
-<body>
-"""
+</form>""", names=recipeNameList)
 
-def recipesList():    
-    recipeList = db.get_all_recipes()    
-    recipeStringHTML = """\
-<html>
-<head>
-<title>Recipe List</title>
-<style type='text/css'>
-h1 {color:green;}
-body {
-font-size: 20px;
-}
-</style>
-<h1>RECIEPE LIST</h1><ul>"""
-    for recipe in recipeList:        
-	if recipe.need_ingredients():            
-	    val = "no"        
-	else:           
-	    val = "yes"        
-	recipeStringHTML += ("<li>"+recipe._recipeName + " " + val +"<p>")   
-    recipeStringHTML += ("</ul>"+"<p><a href='/'>GO HOME</a>"+"""</head><body>""")    
 
-    return recipeStringHTML
-   
-def inventoryList(): 
-    inventoryStringHTML = """\    
-<html>
-<head>
-<title>INVENTORY LIST</title>
-<style type='text/css'>
-h1 {color:green;}
-body {font-size: 20px;}
-</style>
-<h1>INVENTORY LIST</h1><ul>"""   
+    try:
+        template = env.get_template(filename)
+    except Exception:# for nosetests
+        loader = jinja2.FileSystemLoader('./drinkz/templates')
+        env = jinja2.Environment(loader=loader)
+        template = env.get_template(filename)
+        
+    x = template.render(vars).encode('ascii','ignore')
+    return x
 
-    for (m,l) in db.get_liquor_inventory():        
-	inventoryStringHTML+= ("<li>" + str(m)+ " " + str(l)+ " "  + str(db.get_liquor_amount(m,l))+" ml"+ "<p>")
-    inventoryStringHTML += ("</ul>"+"<p><a href='/'>GO HOME</a>"+"""</head><body>""")    
-    return inventoryStringHTML    
+def inventoryList():
+    # this sets up jinja2 to load templates from the 'templates' directory
+    loader = jinja2.FileSystemLoader('../drinkz/templates')
+    env = jinja2.Environment(loader=loader)
 
+    # pick up a filename to render
+    filename = "listPages.html"
+
+    inventoryList = list()
+    for (m,l) in db.get_liquor_inventory():
+        inventoryList.append(str(m)+ " " + str(l)+ " " + str(db.get_liquor_amount(m,l))+" ml")
+    
+    
+    # variables for the template rendering engine
+
+    vars = dict(title = 'Inventory List', addtitle = "Add to Inventory",
+                form = """<form action='addInventory'>
+Manufacturer<input type='text' name='mfg' size'20'><p>
+Liquor<input type='text' name='liquor' size'20'><p>
+Amount<input type='text' name='amt' size'20'><p>
+<input type='submit'>
+</form>""", names=inventoryList)
+
+    template = env.get_template(filename)
+    
+    x = template.render(vars).encode('ascii','ignore')
+    return x
 
 def liquorTypesList():
-    liqourTypeStringHTML = """\
-<html>
-<head>
-<title>Liqour Types List</title>
-<style type='text/css'>
-h1 {color:green;}
-body {
-font-size: 20px;}
-</style>
-<h1>LIQUOR TYPES</h1><ul>"""    
-   
-    for (m,l) in db.get_liquor_inventory():        
-	liqourTypeStringHTML += ("<li>" + str(m)+ " " + str(l) + "<p>")    
-    liqourTypeStringHTML += ("</ul>"+"<p><a href='/'>GO HOME</a>"+"""</head><body>""")    
-    return liqourTypeStringHTML 
+    # this sets up jinja2 to load templates from the 'templates' directory
+    
+    loader = jinja2.FileSystemLoader('../drinkz/templates')
+    env = jinja2.Environment(loader=loader)
+
+    # pick up a filename to render
+    filename = "listPages.html"
+
+    #recipe nonsense
+    liqourTypesList = list()
+    for (m,l) in db.get_liquor_types():
+        liqourTypesList.append(str(m)+ " " + str(l))
+    # variables for the template rendering engine
+
+    vars = dict(title = 'Liquor Types List', addtitle = "<p>Add Liquor Type",
+                form = """<form action='addType'>
+Manufacturer<input type='text' name='mfg' size'20'><p>
+Liquor<input type='text' name='liquor' size'20'><p>
+Generic Type<input type='text' name='typ' size'20'><p>
+<input type='submit'>
+</form>""", names=liqourTypesList)
+
+
+    template = env.get_template(filename)
+    
+    x = template.render(vars).encode('ascii','ignore')
+    return x
 
 
 #Starts up the web application

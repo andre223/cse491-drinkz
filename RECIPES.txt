@@ -1,0 +1,12 @@
+1. Create a .txt file with contents similar to this format:
+
+	Format:
+	recipe name, ingredient name, ingredient amount, ingredient name, ingredient amount .....
+
+	Example:
+	vomit inducing martini, orange juice, 6oz, vermout, 1.5 oz
+
+   *** If the format is wrong, an assert will be raised ***
+
+2. To bulk load recipes, call load_bulk_data module with an open file
+	ex. "load_bulk_data.load_recipes(open("test-data/recipe-data.txt", "rb")"

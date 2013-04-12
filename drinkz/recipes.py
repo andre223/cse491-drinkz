@@ -15,7 +15,6 @@ class Recipe(object):
 	    listOfTuples = db.check_inventory_for_type(ingredient[0])
 	    
 	    stockAmount = 0            
-	    
 	    for tuple in listOfTuples:                
 		amt = db.get_liquor_amount(tuple[0],tuple[1])                
 		if amt>stockAmount:                    
@@ -27,4 +26,10 @@ class Recipe(object):
 	return missingList
 
     def __eq__(self, other):         
-	return self._recipeName == other._recipeName                    
+	return self._recipeName == other._recipeName
+    
+    def get_name(self):
+        return self._recipeName
+
+    def get_ingredients(self):
+        return self._ingredients

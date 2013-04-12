@@ -7,10 +7,11 @@ Module to load in bulk data from text files.
 #   import drinkz.load_bulk_data
 #   help(drinkz.load_bulk_data)
 #
-
 import csv                              # Python csv package
 
+import pprint
 from . import db                        # import from local package
+from . import recipes
 
 
 def load_bottle_types(fp):
@@ -28,14 +29,20 @@ def load_bottle_types(fp):
     x = []
     n = 0
 
-    try:
-	for mfg, name, typ in reader:
-	    n += 1
-	    db.add_bottle_type(mfg, name, typ)
-    except ValueError:
-	print "Incorrect line format."
-	pass
-    
+    for line in reader:
+        if(len(line) != 3):
+            continue
+        try:
+            (mfg, name, typ) = line
+        except:
+            print "Incorrect line format"
+        
+        n += 1
+        try:
+            db.add_bottle_type(mfg, name, typ)
+        except:
+            print "Failed to add to inventory"
+            
     return n
 
 def load_inventory(fp):
@@ -67,6 +74,33 @@ def load_inventory(fp):
 	    db.add_to_inventory(mfg, name, amount)
 	except:
 	    print "Failed to add to the inventory"
+            
+    return n
+
+# HW 5
+def load_recipes(fp):
+    '''
+    Load in recipe data
+    '''
+    reader = csv_reader(fp)
+    n = 0
+    for line in reader:
+        name = line[0]
+        ings = line[1:]
+
+        myIngSet = set()
+        i = 0
+        while(i < len(ings)):
+            val = (ingred,amount) = (ings[i],ings[i+1])
+            myIngSet.add(val)
+            i+=2
+
+        r = recipes.Recipe(name,myIngSet)
+        try:
+            db.add_recipe(r)
+            n+=1
+        except:
+            print "Could not add to inventory"
 
     return n
 
