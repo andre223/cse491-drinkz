@@ -1,0 +1,33 @@
+STORY
+
+Nik is hosting his 21st birthday party, and he had spent a lot of money during
+the month and realizes he doesnt have a whole lot of money to put down to buy
+the stuff he would like to have.
+
+He decides to make a list of those things and guests can comment by saying yes,
+if they choose to bring that item, And a counter will be set up for the number
+of people who are willing to bring that item.
+
+*He also wants people to rate his what his party will be like based on the information put on the website.
+*He would also like for people to click "going" to see how many would go to his
+party.
+
+The list of things could have DRINKZ(obviously) and food items. 
+
+
+IMPLEMENTATION
+
+I would create a seperate party page where the host posts all the liquor, music
+list, and food items that are going to be at the party, and a seperate page
+that lists the things he would like for people to bring.
+
+There will be a another page that lists all the details/summary of the party
+and have guests give a rating based on what they think the party is going to be like.
+
+
+WEB INTERFACE
+
+I am thinking of having a table for the things the host going to provide and a
+table for the things he would like people to bring. Form for each item, where
+the guests can say yes they are bringing that item, and a form for the total
+number of people who click "going" which returns a number. 
