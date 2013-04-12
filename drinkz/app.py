@@ -146,19 +146,23 @@ alert("You have reached the ALERT BOXX!");
     def addType(self, environ, start_response):
 	formdata = environ['QUERY_STRING']
 	results = urlparse.parse_qs(formdata)
+
 	mfg = results['mfg'][0]
 	liquor = results['liquor'][0]
 	typ = results['typ'][0]
+
 	db.add_bottle_type(mfg, liquor, typ)
 
 	content_type = 'text/html'
 	data = liquorTypesList()
+
 	start_response('200 OK', list(html_headers))
 	return [data]
     #HW5
     def addInventory(self, environ, start_response):
 	formdata = environ['QUERY_STRING']
 	results = urlparse.parse_qs(formdata)
+
 	mfg = results['mfg'][0]
 	liquor = results['liquor'][0]
 	amt = results['amt'][0]
@@ -178,6 +182,7 @@ alert("You have reached the ALERT BOXX!");
     def addRecipe(self, environ, start_response):
 	formdata = environ['QUERY_STRING']
 	results = urlparse.parse_qs(formdata)
+
 	name = results['name'][0]
 	ings = results['ing'][0]
 	myList = ings.split(',')
@@ -251,24 +256,28 @@ alert("You have reached the ALERT BOXX!");
     def rpc_get_recipe_names(self):        
 	recipeList = db.get_all_recipes()        
 	nameList = list()        
+
 	for recipe in recipeList:            
 	    nameList.append(recipe._recipeName)        
 	return nameList    
 
     def rpc_get_liqour_inventory(self):        
 	liqourInvList = list()        
+
 	for (m,l) in db.get_liquor_inventory():
             liqourInvList.append((m,l))
         return liqourInvList
 
     def rpc_get_liqour_types(self):
         liqourTypeList = list()
+
         for (m,l) in db.get_liquor_types():
             liqourTypeList.append((m,l))
         return liqourTypeList
                        
     def rpc_add_bottle_type(self,mfg,liquor,typ):
         returnVal = False
+
         try:
             db.add_bottle_type(mfg, liquor, typ)
             returnVal = True;
@@ -278,6 +287,7 @@ alert("You have reached the ALERT BOXX!");
 
     def rpc_add_to_inventory(self,mfg,liquor,amount):
         returnVal = False
+
         try:
             db.add_to_inventory(mfg, liquor, amount)
             returnVal = True;
@@ -289,6 +299,7 @@ alert("You have reached the ALERT BOXX!");
         myList = ings.split(',')
         myIngSet = set()
         i = 0
+
         while i < len(myList):
             
             val = (ingred,amount) = (myList[i],myList[i+1])
@@ -296,6 +307,7 @@ alert("You have reached the ALERT BOXX!");
             i+=2
             
         r = recipes.Recipe(name,myIngSet)
+
         try:
             db.add_recipe(r)
             returnVal = True
@@ -360,14 +372,12 @@ def recipesList():
     
     
     # variables for the template rendering engine
-
     vars = dict(title = 'Recipe List', addtitle = "Add Recipe",
                 form = """<form action='addRecipe'>
 Name<input type='text' name='name' size'20'><p>
 Ingredients (eg.'vodka,5 oz,grape juice,10 oz')<input type='text' name='ing' size'20'><p>
 <input type='submit'>
 </form>""", names=recipeNameList)
-
 
     try:
         template = env.get_template(filename)
@@ -394,7 +404,6 @@ def inventoryList():
     
     
     # variables for the template rendering engine
-
     vars = dict(title = 'Inventory List', addtitle = "Add to Inventory",
                 form = """<form action='addInventory'>
 Manufacturer<input type='text' name='mfg' size'20'><p>
@@ -417,12 +426,11 @@ def liquorTypesList():
     # pick up a filename to render
     filename = "pages.html"
 
-    #recipe nonsense
     liqourTypesList = list()
     for (m,l) in db.get_liquor_types():
         liqourTypesList.append(str(m)+ " " + str(l))
-    # variables for the template rendering engine
 
+    # variables for the template rendering engine
     vars = dict(title = 'Liquor Types List', addtitle = "<p>Add Liquor Type",
                 form = """<form action='addType'>
 Manufacturer<input type='text' name='mfg' size'20'><p>
@@ -430,7 +438,6 @@ Liquor<input type='text' name='liquor' size'20'><p>
 Generic Type<input type='text' name='typ' size'20'><p>
 <input type='submit'>
 </form>""", names=liqourTypesList)
-
 
     template = env.get_template(filename)
     
