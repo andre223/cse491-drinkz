@@ -1,24 +1,13 @@
 open folder server
 
 run server.py to get host and port by running the command:
-	python server.py
+	python2.7 server.py
 
 To Test the Server:
-run test_server.py like this:
-	python test_server.py hostname port
-	Example: python test_server.py arctic 8888 or 
-		 python test_server.py arctic.cse.msu.edu 8888
+	run run-web in the /bin folder like this:
 
-Server takes a GET and the destination GET (Look at test_server.py for an example)
-Example: GET /[path]
 
-Available paths:
-GET /
-GET /recipesList
-GET /inventoryList
-GET /liquorTypes
-GET /convertToML
-GET /addRecipe
-GET /addType
-GET /addInventory
+Click on 'WSGI SERVER TEST PAGE'
+
+Enter the port number from running server.py and click submit
 
