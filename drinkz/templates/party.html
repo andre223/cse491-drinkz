@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<center>
+<title>{{ title }}</title>
+<style type='text/css'> h1 {color:green;} body {font-size: 20px;} </style>
+<h1>{{ title }}</h1>
+{% for name in names %}
+   <li><b>{{ name }}</b><p>
+{% endfor %}
+<p>
+<h1>{{ title2 }}</h1>
+{{ form }}
+<p>
+</center>
+<p>
+<a href='./hostneedsPage'>Stuff the HOST NEEDs!</a>
+<p>
+<a href='./rating'>RATE THE PARTY</a>
+<p>
+<a href='/'>HOME</a>
+{% endblock %}

@@ -1,0 +1,41 @@
+<html>
+
+  <!-- Show off some jQuery functionality --> 
+
+  <head>
+    <script type="text/javascript" charset="utf-8" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+  </head>
+  <body>
+    <p><center><font size = +3>
+     Supported units oz, gallon, and liter
+    <p>(Example input: 11 gallon or 120 oz or 15 liter)</font></center>
+    <p><font size = +4><center>
+      Convert to ml <input type='text' class='amount' value='' size='10'/> 
+    </center></font>
+    
+    <p class='toupdate' />
+    <script type="text/javascript">
+
+    function update(start, end) {
+       text = '<center><font color="green" size=+2><b>' + start + " = <strong>" + end + 'ml'+'</b></font></center>';
+       $('p.toupdate').html(text);
+    }
+
+    function convert() {
+       amount = $('input.amount').val();
+       $.ajax({
+         url: '/rpc', 
+         type: "POST",
+         dataType: "json",
+         data: JSON.stringify ({method:'convert_units_to_ml', params:[amount,], id:"0"}),
+         success: function (data) { update(amount,data.result) },
+         error: function (err)  { alert ("Error");}
+     });
+   }
+
+   $('input.amount').change(convert);
+   </script>
+
+  </body>
+</html>
+
