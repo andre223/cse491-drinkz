@@ -8,16 +8,15 @@ def main(args):
     port = args[2]    
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
     s.connect((address, int(port)))    
-    s.send("GET / HTTP/1.0\r\n\r\n")
-
-    # Server takes GET and the destination following GET
-    # Example: the following command
-    s.send("GET /recipesList") # prints the Message Body of the HTTP Response
-    
+    #s.send("GET / HTTP/1.0\r\n\r\n")
+     
+    s.send("POST / HTTP/1.0\r\n\r\n")
+    buffer = ""
     while 1:        
 	buf = s.recv(1000)        
 	if not buf:            
-	    break        
+	    break
+	buffer += buf        
 	print buf    
 
     print 'done'

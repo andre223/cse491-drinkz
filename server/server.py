@@ -5,9 +5,14 @@ import random
 import socket
 import time
 from drinkz.app import SimpleApp
+from StringIO import StringIO
+import simplejson
+
+app_obj = SimpleApp()
 
 s = socket.socket()
 host = socket.gethostname()
+#host = socket.getfqdn()
 port = random.randint(8000,9999)
 s.bind((host, port))
 
@@ -19,50 +24,85 @@ while True:
     c, addr = s.accept()
     print 'Got connection from', addr
 
-    data = c.recv(1024) # recieve the GET request
+    buffer = c.recv(1024) 
+
+    while "r\n\r\n" not in buffer:
+	data = c.recv(1024)
+	if not data:
+	    break
+	buffer += data
+	print (buffer,)
+	time.sleep(1)
+
+
+    print 'Got Request: ', (buffer,)
+
+    lines = buffer.splitlines()
+    if(len(lines) < 1):
+	print "Bad request"
+	continue
+    request_line = lines[0]
+    print "Lines: ", request_line
+    request_type, path, protocol = request_line.split()
+    print 'GOT', request_type, path, protocol
+
+    request_headers = lines[1:]
+    query = ""
+    if '?' in path:
+	path, query = path.split('?', 1)
+
+    print request_headers
+
+    environ = {}
+    environ['PATH_INFO'] = path
+    environ['QUERY_STRING'] = query
+    environ['REQUEST_METHOD'] = request_type
+
+    if (request_type == 'POST'):
+	'''
+	lengthList = [cont for cont in request_headers if "Content-Length" in cont]
+	length = lengthList[0]
+	numberList = [int(i) for i in length.split() if i.isdigit()]
+	number = numberList[0]
+	environ['CONTENT_LENGTH'] = number
+        '''
+	environ['CONTENT_LENGTH'] = len(request_headers[0])
+	wsgi_input = request_headers[0]
+	environ['wsgi.input'] = StringIO(wsgi_input)
+
 
     d = {}
-    def my_start_response(s, h, return_id=d):
+    def my_start_response(s, h):
         d['status'] = s
         d['headers'] = h
 
-    app_obj = SimpleApp() # create app object
-        
-    if data[:3] == "GET":
-        status = "HTTP/1.0 "
-        environ = {}
-        if '/recipesList' in data[4:]:
-            environ['PATH_INFO'] = '/recipesList' #put request into path info
-        elif '/inventoryList' in data[4:]:
-            environ['PATH_INFO'] = '/inventoryList'
-        elif '/liquorTypes' in data[4:]:
-            environ['PATH_INFO'] = '/liquorTypes'
-        elif '/convertToML' in data[4:]:
-            environ['PATH_INFO'] = '/convertToML'
-        elif '/addRecipe' in data[4:]:
-            environ['PATH_INFO'] = '/addRecipe'
-        elif '/addType' in data[4:]:
-            environ['PATH_INFO'] = '/addType'
-        elif '/addInventory' in data[4:]:
-            environ['PATH_INFO'] = '/addInventory'
-        elif '/' in data[5:]:
-            environ['PATH_INFO'] = '/'
-        else:
-            environ['PATH_INFO'] = '/error'
+    results = app_obj(environ, my_start_response)
 
-        html = app_obj(environ, my_start_response)
-        status += d['status']
-        status +='\n'
+    print "Results: ", results
+    '''
+    response = simplejson.loads(results[0])
+    print "Response: ", response
+    '''
+    response_headers = []
+    for k, v in d['headers']:
+	h = "%s: %s" % (k,v)
+	response_headers.append(h)
 
-        headers = d['headers']
-
-        print 'STATUS----  ', status
-        print 'HEADERS----  ', headers
-        
-        c.send(status)  #send status and headers
-        c.send(html[0])
+    
+    if request_type == "POST":
+	result_dict = simplejson.loads(results[0])
+	result_dict["success"] = True
+	response = "\r\n".join(response_headers) + "\r\n\r\n" + "".join(simplejson.dumps(result_dict))
     else:
-        c.send("Wrong Format.")
-        c.send("GET /[destination]")
-
+	response = "\r\n".join(response_headers) + "\r\n\r\n" + "".join(results)
+    '''
+    response = "\r\n".join(response_headers) + "\r\n" + str(response['result'])+"\r\n\r\n" 
+    '''
+    c.send("HTTP/1.0 %s\r\n" % d['status'])
+    c.send(response)
     c.close()
+
+
+
+
+

@@ -5,11 +5,9 @@
 <title>{{ title }}</title>
 <style type='text/css'> h1 {color:green;} body {font-size: 20px;} </style>
 <h1>{{ title }}</h1>
-<ul>
 {% for name in names %}
    <li><b>{{ name|e }}</b><p>
 {% endfor %}
-</ul>
 <p>
 <h1>{{ addtitle }}</h1>
 {{form}}

@@ -33,6 +33,14 @@ def main(args):
     r = drinkz.recipes.Recipe('kunamatata', [('orange juice', '6 oz'),('vermouth','1.5 oz')])
     drinkz.db.add_recipe(r)
 
+
+    #HW 6.2 Add to MAIN PARTY PAGE
+    drinkz.db.add_to_partylist('Three olives Cherry Vodka')
+
+
+    #HW 6.2 Add to Host Needs Page
+    drinkz.db.add_to_hostneeds('1','1800 Silver Tequila')
+
     save_db(filename)   
 
 if __name__ == '__main__':

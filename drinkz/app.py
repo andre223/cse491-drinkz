@@ -11,22 +11,42 @@ import fileinput
 import jinja2
 import unicodedata
 import sys
+import socket
 
 dispatch = {
     '/' : 'index',
     '/recipesList' : 'recipesList',
     '/inventoryList' : 'inventoryList',
     '/liquorTypes' : 'liquorTypes',
+    '/partyPage' : 'partyPage',
+    '/hostneedsPage' : 'hostneedsPage',
+    '/rating' : 'rating',
     '/convertToML' : 'formConvertToML',
     '/recvAmount' : 'recvAmount',
+    '/recv_wsgiserver' : 'recv_wsgiserver',
     '/addType' : 'addType',
     '/addInventory' : 'addInventory',
     '/addRecipe' : 'addRecipe',
+    '/addHostNeedsItem' : 'addHostNeedsItem',
+    '/addRating' : 'addRating',
     '/rpc'  : 'dispatch_rpc',
-    '/error' : 'error'
+    '/error' : 'error',
+    '/wsgi_server' : 'wsgi_server'
 }
 
 html_headers = [('Content-type', 'text/html')]
+bodyText = """
+<p><a href='./'>Index</a></p>
+<p><a href='recipes'>Recipes</a></p>
+<p><a href='inventory'>Inventory</a></p>
+<p><a href='liquortypes'>Liquor Types</a></p>
+<p><a href='food_and_drinkz'>Food and Drinks</a></p>
+<p><a href='converter'>Converter</a></p>
+<p><a href='wsgi_server'>WSGI Server Test</a></p>
+<p><a href='login_1'>Login</a></p>
+<p><a href='status'>Login Status</a></p>
+<p><a href='logout'>Logout</a></p>
+"""
 
 class SimpleApp(object):
     def __call__(self, environ, start_response):
@@ -67,6 +87,8 @@ alert("You have reached the ALERT BOXX!");
 <a href='inventoryList'><center>INVENTORY</center><p></a>
 <a href='liquorTypes'><center>LIQUOR TYPES</center><p></a>
 <a href='convertToML'><center>CONVERT TO ML</center><p></a>
+<a href='wsgi_server'><center>WSGI SERVER TEST PAGE</center><p></a>
+<a href='partyPage'><p><center><font size = +3>PARTY PAGE</font></center><p></a>
 <p><center>
 <input type="button" onclick="alertBox()" value="ALERT BOX" />
 </center></head>
@@ -98,38 +120,13 @@ alert("You have reached the ALERT BOXX!");
        
         start_response('200 OK', list(html_headers))
         return [data]
-    '''
-    def helmet(self, environ, start_response):
-        content_type = 'image/gif'
-        data = open('Spartan-helmet-Black-150-pxls.gif', 'rb').read()
 
-        start_response('200 OK', [('Content-type', content_type)])
-        return [data]
-    
-    def form(self, environ, start_response):
-        data = form()
-
-        start_response('200 OK', list(html_headers))
-        return [data]
-    '''
     def formConvertToML(self, environ, start_response):
-	data = convertToML()
+	content_type = 'text/html'
+	data = open('../drinkz/somefile.html').read()
         start_response('200 OK', list(html_headers))
 	return [data]
-    ''' 
-    def recv(self, environ, start_response):
-        formdata = environ['QUERY_STRING']
-        results = urlparse.parse_qs(formdata)
-
-        firstname = results['firstname'][0]
-        lastname = results['lastname'][0]
-
-        content_type = 'text/html'
-        data = "First name: %s; last name: %s.  <a href='./'>return to index</a>" % (firstname, lastname)
-
-        start_response('200 OK', list(html_headers))
-        return [data]
-    '''
+    
     def recvAmount(self, environ, start_response):
         formdata = environ['QUERY_STRING']
         results = urlparse.parse_qs(formdata)
@@ -141,7 +138,98 @@ alert("You have reached the ALERT BOXX!");
         data = "<font size = +4>The amount converted to ml = %s ml</font><p><a href='./'>GO TO HOME PAGE</a>" % (amount)
         start_response('200 OK', list(html_headers))
         return [data]
-    
+    #HW6
+    def wsgi_server(self, environ, start_response):
+	content_type = 'text/html'
+	data = wsgiserver()
+	start_response('200 OK', list(html_headers))
+	return [data]
+
+    def partyPage(self, environ, start_response):
+	data = partyList()
+	start_response('200 OK', list(html_headers))
+	return [data]
+
+    def hostneedsPage(self, environ, start_response):
+	data = hostneedsList()
+	start_response('200 OK', list(html_headers))
+	return [data]
+
+    def rating(self, environ, start_response):
+	data = ratingPage()
+	start_response('200 OK', list(html_headers))
+	return [data]
+
+    def addRating(self, environ, start_response):
+	formdata = environ['QUERY_STRING']
+	results = urlparse.parse_qs(formdata)
+
+	rating = results['rating'][0]
+	rating = db.add_rating(rating)
+
+	content_type = 'text/html'
+	data = "<font size = +4>The number of people who gave a: <p>"
+	data += "<center>Rating of 1: %d <p>" %(db.get_num_of_one_ratings())
+	data += "Rating of 2: %d <p>" %(db.get_num_of_two_ratings())
+	data += "Rating of 3: %d <p></center></font>" %(db.get_num_of_three_ratings())
+	data += "<p><a href='./partyPage'> GO TO PARTY PAGE</a>"
+
+	start_response('200 OK', list(html_headers))
+	return [data]
+
+    def addHostNeedsItem(self, environ, start_response):
+	formdata = environ['QUERY_STRING']
+	results = urlparse.parse_qs(formdata)
+
+	item_no = str(results['item'][0])
+	
+	if (db.check_hostneeds_list(item_no)):
+	    item = db.get_hostneeds_item(item_no)
+	    db.add_to_partylist(item)
+	    db.delete_hostneeds_item(item_no)
+	
+	content_type = 'text/html'
+	data = hostneedsList()
+
+	start_response('200 OK', list(html_headers))
+	return [data]
+
+    def recv_wsgiserver(self, environ, start_response):
+	formdata = environ['QUERY_STRING']
+	results = urlparse.parse_qs(formdata)
+
+	if ('port' in results.keys()):
+	    port = int(results['port'][0])
+	else:
+	    port = 0
+
+   	s = socket.socket()
+	host = socket.gethostname()
+
+	d = dict(method='add', params=[3,2], id = "0")
+	encoded = simplejson.dumps(d)
+
+	s.connect((host,port))
+    	s.send('POST /rpc HTTP/1.0\n' + encoded + '\n\r\n\r\n')
+	
+	buffer = ""
+	while "\r\n\r\n" not in buffer:
+	    data = s.recv(1024)
+	    buffer += data
+
+	s.close()
+	
+	print 'gotbuffer:', buffer
+        result = buffer.splitlines()
+        num = result[2]
+        
+        content_type = 'text/html'
+        
+        data = "Server tested success<br>2+3="+num+"<p><a href='./'>Index</a>"
+        
+        start_response('200 OK', list(html_headers) )
+        return [data]
+
     #HW5
     def addType(self, environ, start_response):
 	formdata = environ['QUERY_STRING']
@@ -333,9 +421,7 @@ Your last name? <input type='text' name='lastname' size='20'>
 """
 '''
 
-# HW5 Changes Start Here
-
-
+'''
 def convertToML():
     # this sets up jinja2 to load templates from the 'templates' directory
     loader = jinja2.FileSystemLoader('../drinkz/templates')
@@ -352,7 +438,9 @@ Enter amount(eg. 11 gallon or 120 oz or 15 liter)<input type='text' name='amount
 
     x = env.get_template(filename).render(vars).encode('ascii','ignore')
     return x
+'''
 
+# HW5 Changes Start Here
 
 def recipesList():
     # this sets up jinja2 to load templates from the 'templates' directory
@@ -445,7 +533,97 @@ Generic Type<input type='text' name='typ' size'20'><p>
     return x
 
 
-#Starts up the web application
+#HW 6.2
+def partyList():
+    # this sets up jinja2 to load templates from the 'templates' directory
+    
+    loader = jinja2.FileSystemLoader('../drinkz/templates')
+    env = jinja2.Environment(loader=loader)
+
+    # pick up a filename to render
+    filename = "party.html"
+
+    partyList = list()
+    complete_list = db.get_all_partylist()
+
+    for item in complete_list:
+        partyList.append(item)
+
+    # variables for the template rendering engine
+    vars = dict(title = 'Party List', names=partyList)
+
+    #template = env.get_template(filename)
+    try:
+        template = env.get_template(filename)
+    except Exception:# for nosetests
+        loader = jinja2.FileSystemLoader('./drinkz/templates')
+        env = jinja2.Environment(loader=loader)
+        template = env.get_template(filename)
+    
+    x = template.render(vars).encode('ascii','ignore')
+    return x
+
+
+def ratingPage():
+    # this sets up jinja2 to load templates from the 'templates' directory
+    
+    loader = jinja2.FileSystemLoader('../drinkz/templates')
+    env = jinja2.Environment(loader=loader)
+
+    # pick up a filename to render
+    filename = "pages.html"
+
+    # variables for the template rendering engine
+    vars = dict(title = 'Rate this Party', addtitle = "", form = """<form
+action='addRating'> Rate (on a scale of 1 to 3, 3 being the best)<input
+type='text' name='rating' size'10'><p><input type='submit'></form>""", names =
+"")
+
+    x = env.get_template(filename).render(vars).encode('ascii','ignore')
+    return x
+
+def hostneedsList():
+    # this sets up jinja2 to load templates from the 'templates' directory
+    
+    loader = jinja2.FileSystemLoader('../drinkz/templates')
+    env = jinja2.Environment(loader=loader)
+
+    # pick up a filename to render
+    filename = "pages.html"
+
+    hostNeedsList = list()
+    for (m,l) in db.get_all_hostneeds_list():
+        hostNeedsList.append(str(m) + "-" + str(l))
+    print hostNeedsList
+
+    # variables for the template rendering engine
+    vars = dict(title = 'HOST NEEDS LIST', addtitle = "", form = """<form
+action='addHostNeedsItem'>Enter the Item# associated with the Item that you
+would like to bring<input type='text' name='item' size'20'><p>
+<input type='submit'>
+</form>""", names=hostNeedsList)
+
+    template = env.get_template(filename)
+    
+    x = template.render(vars).encode('ascii','ignore')
+    return x
+
+
+def wsgiserver():
+    loader = jinja2.FileSystemLoader('../drinkz/templates')
+    env = jinja2.Environment(loader=loader)
+
+    filename = "wsgiserver.html"
+
+    vars = dict(title = "Test WSGI server", title2 = "Run in browser and enter port # it is running on:", addtitle="Port:", form = """ <form action='recv_wsgiserver'><input type='text' name='port' size'20'><input type='submit'></form></body></html>""", bodyFormat = "")
+
+    template = env.get_template(filename)
+
+    result = template.render(vars).encode('ascii','ignore')
+    
+    return result
+
+
 def WebServer():
     import random, socket
     port = random.randint(8000,9999)
