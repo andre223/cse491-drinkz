@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 from wsgiref.simple_server import make_server
 from db import save_db, load_db
+from Cookie import SimpleCookie
+
 import sys
 import urlparse
 import simplejson
@@ -12,9 +14,14 @@ import jinja2
 import unicodedata
 import sys
 import socket
+import uuid
+import random
+
+usernames = {}
 
 dispatch = {
-    '/' : 'index',
+    '/' : 'login1',
+    '/index' : 'index',
     '/recipesList' : 'recipesList',
     '/inventoryList' : 'inventoryList',
     '/liquorTypes' : 'liquorTypes',
@@ -31,22 +38,14 @@ dispatch = {
     '/addRating' : 'addRating',
     '/rpc'  : 'dispatch_rpc',
     '/error' : 'error',
-    '/wsgi_server' : 'wsgi_server'
+    '/wsgi_server' : 'wsgi_server',
+    '/login_1' : 'login1',
+    '/login1_process' : 'login1_process',
+    '/logout' : 'logout',
+    '/status' : 'status'
 }
 
 html_headers = [('Content-type', 'text/html')]
-bodyText = """
-<p><a href='./'>Index</a></p>
-<p><a href='recipes'>Recipes</a></p>
-<p><a href='inventory'>Inventory</a></p>
-<p><a href='liquortypes'>Liquor Types</a></p>
-<p><a href='food_and_drinkz'>Food and Drinks</a></p>
-<p><a href='converter'>Converter</a></p>
-<p><a href='wsgi_server'>WSGI Server Test</a></p>
-<p><a href='login_1'>Login</a></p>
-<p><a href='status'>Login Status</a></p>
-<p><a href='logout'>Logout</a></p>
-"""
 
 class SimpleApp(object):
     def __call__(self, environ, start_response):
@@ -66,6 +65,17 @@ class SimpleApp(object):
         return fn(environ, start_response)
             
     def index(self, environ, start_response):
+	name1 = ''
+	name1_key = '*empty'
+	if 'HTTP_COOKIE' in environ:
+            c = SimpleCookie(environ.get('HTTP_COOKIE', ''))
+            if 'name1' in c:
+                key = c.get('name1').value
+                name1 = usernames.get(key, '')
+                name1_key = key
+        if name1=='':
+            return self.login1(environ,start_response) 
+
         data = """\
 
 <html>
@@ -89,7 +99,9 @@ alert("You have reached the ALERT BOXX!");
 <a href='convertToML'><center>CONVERT TO ML</center><p></a>
 <a href='wsgi_server'><center>WSGI SERVER TEST PAGE</center><p></a>
 <a href='partyPage'><p><center><font size = +3>PARTY PAGE</font></center><p></a>
-<p><center>
+<p>
+<a href='logout'><center>LOGOUT</center><p></a>
+<center>
 <input type="button" onclick="alertBox()" value="ALERT BOX" />
 </center></head>
 <body>
@@ -98,7 +110,84 @@ alert("You have reached the ALERT BOXX!");
         start_response('200 OK', list(html_headers))
         return [data]
     
-    def recipesList(self, environ, start_response):
+    def login1(self, environ, start_response):
+        name1 = ''
+        name1_key = '*empty*'
+        if 'HTTP_COOKIE' in environ:
+            c = SimpleCookie(environ.get('HTTP_COOKIE', ''))
+            if 'name1' in c:
+                key = c.get('name1').value
+                name1 = usernames.get(key, '')
+                name1_key = key
+        if name1:
+            return self.index(environ,start_response)          
+        else:
+            start_response('200 OK', list(html_headers))
+            title = 'login'
+            loader = jinja2.FileSystemLoader('../drinkz/templates')
+            env = jinja2.Environment(loader=loader)
+            template = env.get_template('login1.html')
+            return str(template.render(locals()))
+
+    def login1_process(self, environ, start_response):
+        formdata = environ['QUERY_STRING']
+        results = urlparse.parse_qs(formdata)
+
+        name = results['name'][0]
+        content_type = 'text/html'
+
+        # authentication would go here -- is this a valid username/password,
+        # for example?
+
+        k = str(uuid.uuid4())
+        usernames[k] = name
+
+        headers = list(html_headers)
+        headers.append(('Location', '/index'))
+        headers.append(('Set-Cookie', 'name1=%s' % k))
+
+        start_response('302 Found', headers)
+        return ["Redirect to /index..."]
+
+    def logout(self, environ, start_response):
+        if 'HTTP_COOKIE' in environ:
+            c = SimpleCookie(environ.get('HTTP_COOKIE', ''))
+            if 'name1' in c:
+                key = c.get('name1').value
+                name1_key = key
+
+                if key in usernames:
+                    del usernames[key]
+                    print 'DELETING'
+
+        pair = ('Set-Cookie',
+                'name1=deleted; Expires=Thu, 01-Jan-1970 00:00:01 GMT;')
+        headers = list(html_headers)
+        headers.append(('Location', '/status'))
+        headers.append(pair)
+
+        start_response('302 Found', headers)
+        return ["Redirect to /status..."]
+    
+    def status(self, environ, start_response):
+        start_response('200 OK', list(html_headers))
+
+        name1 = ''
+        name1_key = '*empty*'
+        if 'HTTP_COOKIE' in environ:
+            c = SimpleCookie(environ.get('HTTP_COOKIE', ''))
+            if 'name1' in c:
+                key = c.get('name1').value
+                name1 = usernames.get(key, '')
+                name1_key = key
+                
+        title = 'login status'
+        loader = jinja2.FileSystemLoader('../drinkz/templates')
+        env = jinja2.Environment(loader=loader)
+        template = env.get_template('status.html')
+        return str(template.render(locals()))
+
+    def recipesList(self, environ, start_response):    
         data = recipesList()
         start_response('200 OK', list(html_headers))
         return [data]
@@ -571,7 +660,7 @@ def ratingPage():
     env = jinja2.Environment(loader=loader)
 
     # pick up a filename to render
-    filename = "pages.html"
+    filename = "rating.html"
 
     # variables for the template rendering engine
     vars = dict(title = 'Rate this Party', addtitle = "", form = """<form
@@ -589,7 +678,7 @@ def hostneedsList():
     env = jinja2.Environment(loader=loader)
 
     # pick up a filename to render
-    filename = "pages.html"
+    filename = "host_needs.html"
 
     hostNeedsList = list()
     for (m,l) in db.get_all_hostneeds_list():
@@ -608,14 +697,14 @@ would like to bring<input type='text' name='item' size'20'><p>
     x = template.render(vars).encode('ascii','ignore')
     return x
 
-
+#6.1
 def wsgiserver():
     loader = jinja2.FileSystemLoader('../drinkz/templates')
     env = jinja2.Environment(loader=loader)
 
     filename = "wsgiserver.html"
 
-    vars = dict(title = "Test WSGI server", title2 = "Run in browser and enter port # it is running on:", addtitle="Port:", form = """ <form action='recv_wsgiserver'><input type='text' name='port' size'20'><input type='submit'></form></body></html>""", bodyFormat = "")
+    vars = dict(title = "Test WSGI server", title2 = "Enter the port # it is running on:", addtitle="Port:", form = """ <form action='recv_wsgiserver'><input type='text' name='port' size'20'><input type='submit'></form></body></html>""", bodyFormat = "")
 
     template = env.get_template(filename)
 

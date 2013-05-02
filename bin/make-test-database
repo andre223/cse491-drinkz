@@ -35,11 +35,24 @@ def main(args):
 
 
     #HW 6.2 Add to MAIN PARTY PAGE
-    drinkz.db.add_to_partylist('Three olives Cherry Vodka')
-
+    drinkz.db.add_to_partylist('Three Olives Cherry Vodka')
+    drinkz.db.add_to_partylist('Smirnoff Vodka')
+    drinkz.db.add_to_partylist('Malibu Rum')
+    drinkz.db.add_to_partylist('Ten boxes of PIZZA')
+    drinkz.db.add_to_partylist('Crown Royal Whiskey')
+    drinkz.db.add_to_partylist('Southern Comfort Cordial')
+    drinkz.db.add_to_partylist('Ciroc Vodka')
+    drinkz.db.add_to_partylist('Johnnie Walker Scotch')
+    drinkz.db.add_to_partylist('Cuervo Gold Tequila')
+    drinkz.db.add_to_partylist('Hazelnut Schnapps')
 
     #HW 6.2 Add to Host Needs Page
     drinkz.db.add_to_hostneeds('1','1800 Silver Tequila')
+    drinkz.db.add_to_hostneeds('2','Bacardi Rum')
+    drinkz.db.add_to_hostneeds('3','Hennessy Brandy')
+    drinkz.db.add_to_hostneeds('4','10 Bottles of POP(as chaser)')
+    drinkz.db.add_to_hostneeds('5','Grey Goose Vodka')
+    drinkz.db.add_to_hostneeds('6','Jack Daniels Whiskey')
 
     save_db(filename)   
 

@@ -6,17 +6,12 @@
 <style type='text/css'> h1 {color:green;} body {font-size: 20px;} </style>
 <h1>{{ title }}</h1>
 {% for name in names %}
-   <li><b>{{ name }}</b><p>
+   <li><b>{{ name|e }}</b><p>
 {% endfor %}
 <p>
-<h1>{{ title2 }}</h1>
-{{ form }}
-<p>
+<h1>{{ addtitle }}</h1>
+{{form}}
 </center>
 <p>
-<a href='./hostneedsPage'>Stuff the HOST NEEDs!</a>
-<p>
-<a href='./rating'>RATE THE PARTY</a>
-<p>
-<a href='./index'>HOME</a>
+<a href='./partyPage'>BACK TO PARTY PAGE</a>
 {% endblock %}

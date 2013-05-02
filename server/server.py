@@ -59,13 +59,6 @@ while True:
     environ['REQUEST_METHOD'] = request_type
 
     if (request_type == 'POST'):
-	'''
-	lengthList = [cont for cont in request_headers if "Content-Length" in cont]
-	length = lengthList[0]
-	numberList = [int(i) for i in length.split() if i.isdigit()]
-	number = numberList[0]
-	environ['CONTENT_LENGTH'] = number
-        '''
 	environ['CONTENT_LENGTH'] = len(request_headers[0])
 	wsgi_input = request_headers[0]
 	environ['wsgi.input'] = StringIO(wsgi_input)
